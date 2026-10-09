@@ -107,7 +107,10 @@ resource "aws_ecs_service" "bastion" {
   enable_execute_command = true
 
   network_configuration {
-    subnets          = aws_subnet.private[*].id
+    # VPC エンドポイントと同じ 1 サブネットにタスクを置き、
+    # タスク → エンドポイント → Aurora の通信を同一 AZ で完結させる
+    # （AZ 間データ転送料金を避けるため）。
+    subnets          = [aws_subnet.private[0].id]
     security_groups  = [aws_security_group.ecs.id]
     assign_public_ip = false
   }
